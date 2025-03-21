@@ -6,6 +6,7 @@
 #include<cstring>
 #include<windows.h>
 #include<cmath>
+const int Store_size=100;
 using namespace std;
 struct Store;
 struct Employee;
@@ -123,7 +124,7 @@ struct Salesdata
     double TotalSaleAmount=0;
 };
 
-void initializeStorename(Store S[100],int i)
+void initializeStorename(Store S[Store_size],int i)
 {
     //Store Name
     S[i].sName=new char[13];  //name can be of max 12 characters
@@ -132,14 +133,14 @@ void initializeStorename(Store S[100],int i)
     strcat(S[i].sName,temp.c_str());
 }
 
-void initializeStoreID(Store S[100],int i)
+void initializeStoreID(Store S[Store_size],int i)
 {
      //Store ID
          //Recheck if store with same Id exists
         S[i].sID=i+100;
 }
 
-void initializeStoreLocation(Store S[100],int i)
+void initializeStoreLocation(Store S[Store_size],int i)
 {
     //Addition part ensures decimal values are included
         //Location
@@ -147,19 +148,19 @@ void initializeStoreLocation(Store S[100],int i)
         S[i].Location.gLong=(rand()%360-180)+(rand()%101)/100.0;
 }
 
-void initializeMonthlyCost(Store S[100],int i)
+void initializeMonthlyCost(Store S[Store_size],int i)
 {
     //Monthly cost of store
     S[i].sMonthlyCost=(rand()%3500+1000)+(rand()%101)/100.0;
     S[i].sA.totaloperationalcost=S[i].sMonthlyCost*24;
 }
 
-void initializeManager(Store S[100],int i)
+void initializeManager(Store S[Store_size],int i)
 {
      //Manager
      S[i].Manager.eID=rand()%900+100;
      //Ensure whether a manager with same ID exists;
-     for (int j = 0; j < 100; j++)
+     for (int j = 0; j < Store_size; j++)
      {
       if(S[i].Manager.eID==S[j].Manager.eID  && i!=j)   
          {
@@ -183,7 +184,17 @@ void initializeManager(Store S[100],int i)
      }
 }
 
-void initializeStaff(Store S[100],int i)
+void deleteStore(Store S)
+{
+    delete[] S.sName;
+        delete[] S.Manager.eName;
+        for (int j=0;j<S.S_count;j++) {
+            delete[] S.Staff[j].eName;
+        }
+        delete[] S.Staff;
+}
+
+void initializeStaff(Store S[Store_size],int i)
 {
     //Staff initialize
     S[i].S_count=rand()%50+50;
@@ -214,7 +225,7 @@ void initializeStaff(Store S[100],int i)
                 k=-1;
             }
        }
-           for(int p=0;p<100;p++)  //Checking for same ID in ALL stores
+           for(int p=0;p<Store_size;p++)  //Checking for same ID in ALL stores
            {
                for(int k=0;k<S[p].S_count;k++)
                {
@@ -231,7 +242,7 @@ void initializeStaff(Store S[100],int i)
     }
 }
 
-void initializeMonthlyCustomerCount(Store S[100],int i)
+void initializeMonthlyCustomerCount(Store S[Store_size],int i)
 {
     //initializing 0 for increasing later
     for(int j=0;j<24;j++)
@@ -265,12 +276,12 @@ void initializeProducts(Products Prod[35])
     cout<<"error with loading product file";
 }
 
-void initializeSales(Store S[100],Products Prod[35],Salesdata Sales[20000])
+void initializeSales(Store S[Store_size],Products Prod[35],Salesdata Sales[20000])
 {
     srand(time(0));
     for(int i=0;i<20000;i++)
     {
-        int st=rand()%100;
+        int st=rand()%Store_size;
         Sales[i].ID=S[st].sID;
 
         Sales[i].P_num=rand()%4+1;  //no of products sold in that one sale
@@ -358,7 +369,7 @@ void initializeSales(Store S[100],Products Prod[35],Salesdata Sales[20000])
 
 }
 
-void CalculateAnalytics(Store S[100],Products Prod[35],Salesdata* Sales,int i)
+void CalculateAnalytics(Store S[Store_size],Products Prod[35],Salesdata* Sales,int i)
 {
     //calculate  analytics according to sales of a store
     for(int j=0;j<20000;j++)
@@ -374,14 +385,14 @@ void CalculateAnalytics(Store S[100],Products Prod[35],Salesdata* Sales,int i)
 
 
 
-void initializeData(Store S[100],Products Prod[35])
+void initializeData(Store S[Store_size],Products Prod[35])
 {
 //initializing data
     initializeProducts(Prod);
     
     
     srand(time(0));
-    for(int i=0;i<100;i++)
+    for(int i=0;i<Store_size;i++)
     {  
         initializeStorename(S,i);
         initializeStoreID(S,i);
@@ -397,8 +408,8 @@ void initializeData(Store S[100],Products Prod[35])
 
 
 //deleting all data 
-void deleteData(Store S[100], Products Prod[35],Salesdata* Sales) {
-    for (int i = 0; i < 100; i++) {
+void deleteData(Store S[Store_size], Products Prod[35],Salesdata* Sales) {
+    for (int i = 0; i < Store_size; i++) {
         delete[] S[i].sName;
         delete[] S[i].Manager.eName;
         delete[] S[i].sF.month;
@@ -426,12 +437,13 @@ void deleteData(Store S[100], Products Prod[35],Salesdata* Sales) {
 }
 
 //Saving stores data in file
-void SaveData(Store S[100])
+void SaveData(Store S[Store_size])
 {
     ofstream File("StoreData.txt");
     if(File.is_open())
     {
-        for (int i = 0; i < 100; i++)
+        File<<Store_size<<',';
+        for (int i = 0; i < Store_size; i++)
         {
             File<<S[i].sName<<',';
             File<<S[i].sID<<',';
@@ -491,13 +503,19 @@ if(File.is_open())
 
 
 //fetching store data
-void LoadData(Store S[100])
+bool LoadData(Store S[Store_size])
 {
     ifstream File("StoreData.txt");
     if(File.is_open())
     {
         string line;
-            for(int i=0;i<100;i++)
+        getline(File,line,',');
+        if(stoi(line)!=Store_size)
+        {
+        File.close();
+        return 0;
+        }
+            for(int i=0;i<Store_size;i++)
             {
             getline(File,line,',');
             S[i].sName=new char[line.length()+1];
@@ -547,8 +565,9 @@ void LoadData(Store S[100])
              S[i].MonthlyIncome[j]=stof(line);   
             }
             }
-            File.close();
     }
+    File.close();
+    return 1;
 }
 //fetching product info
 void LoadProducts(Products Prod[35])
@@ -639,17 +658,17 @@ void Store_Deep(Store &TO,const Store &BY)
         }
 }
 
-void SortOverall(Store S[100],Products P[35],Salesdata* Sales)
+void SortOverall(Store S[Store_size],Products P[35],Salesdata* Sales)
 {
     Report R1;
     R1.topStores=new Store[10];
     R1.bottomStores=new Store[5];
     int top[10]={0};
     int bottom[5]={0};
-    double score[100]={0};
-    double temp[100]={0};
-    double growthRate[100]={0};
-    for(int i=0;i<100;i++)
+    double score[Store_size]={0};
+    double temp[Store_size]={0};
+    double growthRate[Store_size]={0};
+    for(int i=0;i<Store_size;i++)
     {   
         for(int j=1;j<24;j++)
         {
@@ -657,7 +676,7 @@ void SortOverall(Store S[100],Products P[35],Salesdata* Sales)
         }
         growthRate[i]/=23.0;
     }
-    for(int i=0;i<100;i++)
+    for(int i=0;i<Store_size;i++)
     {
         score[i]=(S[i].sA.profit*0.5)+(growthRate[i]*0.3)+(S[i].sA.totalSales)*0.2;
         temp[i]=score[i];
@@ -666,7 +685,7 @@ void SortOverall(Store S[100],Products P[35],Salesdata* Sales)
     for(int i=0;i<5;i++)
     {
         int min=INT_MAX;
-        for(int j=0;j<100;j++)
+        for(int j=0;j<Store_size;j++)
         {
             if(min>score[j] && score[j]!=INT_MIN)
             {
@@ -679,7 +698,7 @@ void SortOverall(Store S[100],Products P[35],Salesdata* Sales)
     for(int i=0;i<10;i++)
     {
         int max=INT_MIN;
-        for(int j=0;j<100;j++)
+        for(int j=0;j<Store_size;j++)
         {
             if(max<score[j] && score[j]!=INT_MAX)
             {
@@ -710,21 +729,20 @@ void SortOverall(Store S[100],Products P[35],Salesdata* Sales)
     cout<<"     Store ID     Store Name          Performance Score"<<endl;
     for(int i=4;i>=0;i--)
     {
-        cout<<setw(3)<<left<<100-i<<"  ";
+        cout<<setw(3)<<left<<Store_size-i<<"  ";
         cout<<R1.bottomStores[i].sID<<"          ";
         cout<<setw(20)<<left<<R1.bottomStores[i].sName;
         cout<<temp[bottom[i]]<<endl;
     }   
     for (int i=0;i<10;i++) 
-        delete[] R1.topStores[i].sName;
+        deleteStore(R1.topStores[i]);
     for (int i=0;i<5;i++) 
-        delete[] R1.bottomStores[i].sName;
-
+        deleteStore(R1.bottomStores[i]);    
     delete[] R1.bottomStores;
     delete[] R1.topStores;
 }
 
-void SortByProfit(Store S[100],Products P[35],Salesdata* Sales)
+void SortByProfit(Store S[Store_size],Products P[35],Salesdata* Sales)
 {
 
     Report R1;
@@ -732,15 +750,15 @@ void SortByProfit(Store S[100],Products P[35],Salesdata* Sales)
     R1.bottomStores=new Store[5];
     int top[10];  //array to store index of top 10 values
     int bottom[5]; //array to store index of bottom 5 values
-    double score[100];  //array to store score of all 100 stores
-    for(int i=0;i<100;i++)
+    double score[Store_size];  //array to store score of all Store_size stores
+    for(int i=0;i<Store_size;i++)
     {
         score[i]=S[i].sA.profit;
     }
     for(int i=0;i<5;i++)
     {
         int min=INT_MAX;
-        for(int j=0;j<100;j++)
+        for(int j=0;j<Store_size;j++)
         {
             if(min>score[j] && score[j]!=INT_MIN)
             {
@@ -753,7 +771,7 @@ void SortByProfit(Store S[100],Products P[35],Salesdata* Sales)
     for(int i=0;i<10;i++)
     {
         int max=INT_MIN;
-        for(int j=0;j<100;j++)
+        for(int j=0;j<Store_size;j++)
         {
             if(max<score[j] && score[j]!=INT_MAX)
             {
@@ -784,30 +802,30 @@ void SortByProfit(Store S[100],Products P[35],Salesdata* Sales)
     cout<<"     Store ID     Store Name          Profit"<<endl;
     for(int i=4;i>=0;i--)
     {
-        cout<<setw(3)<<left<<100-i<<"  ";
+        cout<<setw(3)<<left<<Store_size-i<<"  ";
         cout<<R1.bottomStores[i].sID<<"          ";
         cout<<setw(20)<<left<<R1.bottomStores[i].sName;
         cout<<S[bottom[i]].sA.profit<<'$'<<endl;
     }   
     for (int i=0;i<10;i++) 
-        delete[] R1.topStores[i].sName;
+        deleteStore(R1.topStores[i]);
     for (int i=0;i<5;i++) 
-        delete[] R1.bottomStores[i].sName;
+        deleteStore(R1.bottomStores[i]);    
     delete[] R1.bottomStores;
     delete[] R1.topStores;
     
 }
 
-void SortBySales(Store S[100],Products P[35],Salesdata* Sales)
+void SortBySales(Store S[Store_size],Products P[35],Salesdata* Sales)
 {
     Report R1;
     R1.topStores=new Store[10];
     R1.bottomStores=new Store[5];
     int top[10];
     int bottom[5];
-    double score[100];
-    double temp[100]={0};
-    for(int i=0;i<100;i++)
+    double score[Store_size];
+    double temp[Store_size]={0};
+    for(int i=0;i<Store_size;i++)
     {
         score[i]=temp[i]=0;
         for(int j=0;j<24;j++)
@@ -818,7 +836,7 @@ void SortBySales(Store S[100],Products P[35],Salesdata* Sales)
     for(int i=0;i<5;i++)
     {
         int min=INT_MAX;
-        for(int j=0;j<100;j++)
+        for(int j=0;j<Store_size;j++)
         {
             if(min>score[j] && score[j]!=INT_MIN)
             {
@@ -831,7 +849,7 @@ void SortBySales(Store S[100],Products P[35],Salesdata* Sales)
     for(int i=0;i<10;i++)
     {
         int max=INT_MIN;
-        for(int j=0;j<100;j++)
+        for(int j=0;j<Store_size;j++)
         {
             if(max<score[j] && score[j]!=INT_MAX)
             {
@@ -862,33 +880,32 @@ void SortBySales(Store S[100],Products P[35],Salesdata* Sales)
     cout<<"     Store ID     Store Name          No. Of Sales"<<endl;
     for(int i=4;i>=0;i--)
     {
-        cout<<setw(3)<<left<<100-i<<"  ";
+        cout<<setw(3)<<left<<Store_size-i<<"  ";
         cout<<R1.bottomStores[i].sID<<"          ";
         cout<<setw(20)<<left<<R1.bottomStores[i].sName;
         cout<<temp[bottom[i]]<<endl;
     }   
     for (int i=0;i<10;i++) 
-        delete[] R1.topStores[i].sName;
+        deleteStore(R1.topStores[i]);
     for (int i=0;i<5;i++) 
-        delete[] R1.bottomStores[i].sName;
-
-    delete[] R1.bottomStores;
-    delete[] R1.topStores;
+        deleteStore(R1.bottomStores[i]);    
+delete[] R1.bottomStores;
+delete[] R1.topStores;
 
 
 
 }
 
-void SortByGrowth(Store S[100],Products P[35],Salesdata* Sales)
+void SortByGrowth(Store S[Store_size],Products P[35],Salesdata* Sales)
 {
     Report R1;
     R1.topStores=new Store[10];
     R1.bottomStores=new Store[5];
     int top[10];
     int bottom[5];
-    double score[100];
-    double temp[100]={0};
-    for(int i = 0; i < 100; i++) {
+    double score[Store_size];
+    double temp[Store_size]={0};
+    for(int i = 0; i < Store_size; i++) {
         score[i] = 0; 
         for(int j=1;j<24;j++)
         {
@@ -902,7 +919,7 @@ void SortByGrowth(Store S[100],Products P[35],Salesdata* Sales)
     for(int i=0;i<5;i++)
     {
         int min=INT_MAX;
-        for(int j=0;j<100;j++)
+        for(int j=0;j<Store_size;j++)
         {
             if(min>score[j] && score[j]!=INT_MIN)
             {
@@ -915,7 +932,7 @@ void SortByGrowth(Store S[100],Products P[35],Salesdata* Sales)
     for(int i=0;i<10;i++)
     {
         int max=INT_MIN;
-        for(int j=0;j<100;j++)
+        for(int j=0;j<Store_size;j++)
         {
             if(max<score[j] && score[j]!=INT_MAX)
             {
@@ -946,16 +963,15 @@ void SortByGrowth(Store S[100],Products P[35],Salesdata* Sales)
     cout<<"     Store ID     Store Name          Growth Percentage"<<endl;
     for(int i=4;i>=0;i--)
     {
-        cout<<setw(3)<<left<<100-i<<"  ";
+        cout<<setw(3)<<left<<Store_size-i<<"  ";
         cout<<R1.bottomStores[i].sID<<"          ";
         cout<<setw(20)<<left<<R1.bottomStores[i].sName;
         cout<<temp[bottom[i]]<<'%'<<endl;
     }   
     for (int i=0;i<10;i++) 
-        delete[] R1.topStores[i].sName;
+        deleteStore(R1.topStores[i]);
     for (int i=0;i<5;i++) 
-        delete[] R1.bottomStores[i].sName;
-
+        deleteStore(R1.bottomStores[i]);    
     delete[] R1.bottomStores;
     delete[] R1.topStores;
 
@@ -1018,9 +1034,9 @@ void Predict_Sales(Store &S)
 
 }
 
-void initializeForecast(Store S[100])
+void initializeForecast(Store S[Store_size])
 {
-	for(int i=0;i<100;i++)
+	for(int i=0;i<Store_size;i++)
 	{
 		S[i].sF.month=new char[15];
 	}
@@ -1037,13 +1053,13 @@ void initializeSubCluster(Cluster &C,int size)
         temp="Sub "+ to_string(i+1);
         C.subClusterList[i].Name=new char[temp.length()+1];
         strcpy(C.subClusterList[i].Name,temp.c_str());
-        C.subClusterList[i].storesList=new Store[100];
+        C.subClusterList[i].storesList=new Store[Store_size];
         C.subClusterList[i].subCenter.Profit=C.sID[i].sA.profit;
     } 
 }
 
 
-void initializeCluster(Cluster* C,Store S[100],int size)
+void initializeCluster(Cluster* C,Store S[Store_size],int size)
 {
     //initializing cluster struct
     for(int i=0;i<size;i++)
@@ -1055,7 +1071,7 @@ void initializeCluster(Cluster* C,Store S[100],int size)
         temp="Cluster "+to_string(i+1);
         C[i].Name=new char[temp.length()+1];
         strcpy(C[i].Name,temp.c_str());
-        C[i].sID=new Store[100];
+        C[i].sID=new Store[Store_size];
         C[i].subSize=3;
         C[i].subClusterList=new subCluster[C[i].subSize];
         initializeSubCluster(C[i],C[i].subSize);     
@@ -1071,7 +1087,7 @@ void UpdateCentroidSub(Cluster &C,int num,int i)
 C.subClusterList[num].subCenter.Profit=(C.subClusterList[num].subCenter.Profit+C.sID[i].sA.profit)/2;
 }
 
-void SubClustering(Cluster &C, Store S[100], int subSize,int size)
+void SubClustering(Cluster &C, Store S[Store_size], int subSize,int size)
 {
     double d[subSize];
     for(int i=0;i<C.size;i++)
@@ -1103,10 +1119,10 @@ C.Center.cLat=(C.Center.cLat+C.sID[C.size-1].Location.gLat)/2.0;
 C.Center.cLong=(C.Center.cLong+C.sID[C.size-1].Location.gLong)/2.0;
 }
 
-void Clustering (Store S[100],Cluster C[3],int size)
+void Clustering (Store S[Store_size],Cluster C[3],int size)
 {
     double d[size];
-    for(int i=0;i<100;i++)
+    for(int i=0;i<Store_size;i++)
     {
         for(int j=0;j<size;j++)
         {
@@ -1186,10 +1202,10 @@ void printClusterInfo(Cluster* C)
     }
 }
 
-void GraphMonthlySales(Store S[100])
+void GraphMonthlySales(Store S[Store_size])
 {
     cout<<"One * is equal to 150 $\n"<<endl;
-    for (int i=0;i<100;i++)
+    for (int i=0;i<Store_size;i++)
     {
         double avg=0;
         for(int j=0;j<24;j++)
@@ -1207,10 +1223,10 @@ void GraphMonthlySales(Store S[100])
 }
 
 
-void GraphByProfit(Store S[100])
+void GraphByProfit(Store S[Store_size])
 {
     cout<<"One * is equal to 1000$"<<endl<<endl;
-    for(int i=0;i<100;i++)
+    for(int i=0;i<Store_size;i++)
     {
         int criteria;
         criteria=S[i].sA.profit/1000;
@@ -1318,7 +1334,9 @@ void GraphBySubCluster(Cluster C[3])
 
 void Run()
 {
-    Store S[100];
+    //stores must be greater than 15
+    //as we are finding top 10 and bottom 5 stores later in the program
+    Store S[Store_size];
     Products Prod[35];
     Cluster C[3];
     Salesdata* Sales = new Salesdata[20000];
@@ -1328,17 +1346,29 @@ void Run()
     {
         Check.close();
         Check2.close();
-        LoadData(S);
+        double check=LoadData(S);
+        if(check==0)
+        {
+            initializeData(S,Prod);
+            initializeSales(S,Prod,Sales);
+        for(int i=0;i<Store_size;i++)
+            CalculateAnalytics(S,Prod,Sales,i);
+            SaveData(S);
+            SaveSales(Sales);
+        }
+        if(check==1)
+        {
         LoadProducts(Prod);
         LoadSales(Sales);
-    }
+        }
+}
     else
     {
         Check.close();
         Check2.close();
         initializeData(S,Prod);
         initializeSales(S,Prod,Sales);
-        for(int i=0;i<100;i++)
+        for(int i=0;i<Store_size;i++)
         CalculateAnalytics(S,Prod,Sales,i);
         SaveData(S);
         SaveSales(Sales);
@@ -1355,6 +1385,8 @@ void Run()
    cout<<endl<<endl;
     if(choice==-1)
     {
+        deleteData(S,Prod,Sales);
+    	deleteClusters(C,3);
         system("CLS");
         cout<<"Thanks for using the system!";
         exit(0);
@@ -1365,6 +1397,8 @@ void Run()
     cin>>choice;
     if(choice==-1)
     {
+    	deleteData(S,Prod,Sales);
+    	deleteClusters(C,3);
         system("CLS");
         cout<<"Thanks for using the system!";
         exit(0);
@@ -1385,7 +1419,7 @@ void Run()
            int temp_choice;
            cout<<"\nEnter Store you want to predict ";
            cin>>temp_choice;
-           while(temp_choice<1 || temp_choice>100)
+           while(temp_choice<1 || temp_choice>Store_size)
            {
                cout<<"\nInvalid\nEnter Store you want to predict ";
                cin>>temp_choice;   
@@ -1407,7 +1441,7 @@ void Run()
         case 9:
         cout<<"\nEnter Store you want Monthly Sales Trend : ";
         cin>>temp_choice;
-        while(temp_choice<1 || temp_choice>100)
+        while(temp_choice<1 || temp_choice>Store_size)
         {
             cout<<"\nInvalid\nEnter Store you want to Monthly Sales Trend ";
             cin>>temp_choice;   
@@ -1422,10 +1456,6 @@ void Run()
         break;
    }
    }
-
-    deleteData(S,Prod,Sales);
-    deleteClusters(C,3);
-    cout<<"a";
 
 } 
 
