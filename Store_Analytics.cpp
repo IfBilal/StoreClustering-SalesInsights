@@ -6,6 +6,7 @@
 #include <cstring>
 #include <windows.h>
 #include <cmath>
+#include <conio.h>
 const int Store_size = 100;
 using namespace std;
 struct Store;
@@ -156,7 +157,7 @@ void initializeManager(Store S[Store_size], int i)
             j = -1;
         }
     }
-    S[i].Manager.Salary = rand() % 500001 + 100000;
+    S[i].Manager.Salary = rand() % 501 + 100;
     fstream File;
     File.open("names.txt", ios::in);
     if (File.is_open())
@@ -1001,6 +1002,8 @@ void Predict_Sales(Store &S)
     double C_level = 100 - (C_Gap * 1.5);
     if (C_level < 5) // minimum threshold
         C_level = 5;
+    cout << "=========================ForeCast Report===========================" << endl
+         << endl;
     cout << "The predicted Sales for " << S.sF.month << " are : " << S.sF.predictedSales << '$' << endl;
     cout << "\nThe Confidence level is : " << setprecision(2) << fixed << C_level << '%' << endl;
 
@@ -1365,8 +1368,8 @@ void Run()
     int choice = 0;
     while (true)
     {
-        cout << "Performance Sorting : \nClick-1 to exit\n1.Overall Performance \n2.By Profit\n3.By Growth Rate\n";
-        cout << "4.Predict Sales\n5.Sort by no of Sales\n6.Print Cluster Info\n7.Graph by Average Monthly Sales\n8.Graph by Profits\n9.Graph by Monthly Sales Trend\n10.Graph By Profit of each cluster\n11.Graph by Profit of all SubClusters\nEnter your choice : ";
+        cout << "\nClick-1 to exit\n1.Sort By Overall Performance \n2.Sort By Profit\n3.Sort By Growth Rate\n";
+        cout << "4.Predict Sales For Next Month\n5.Sort by no of Sales\n6.Print Clusters Info\n7.Graph by Average Monthly Sales\n8.Graph by Profits\n9.Graph by Monthly Sales Trend\n10.Graph By Profit of each cluster\n11.Graph by Profit of all SubClusters\nEnter your choice : ";
         cin >> choice;
         cout << endl
              << endl;
@@ -1394,13 +1397,25 @@ void Run()
         switch (choice)
         {
         case 1:
+            system("CLS");
             SortOverall(S, Prod, Sales);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 2:
+            system("CLS");
             SortByProfit(S, Prod, Sales);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 3:
+            system("CLS");
             SortByGrowth(S, Prod, Sales);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 4:
             int temp_choice;
@@ -1411,19 +1426,39 @@ void Run()
                 cout << "\nInvalid\nEnter Store you want to predict ";
                 cin >> temp_choice;
             }
+            system("CLS");
             Predict_Sales(S[temp_choice - 1]);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 5:
+            system("CLS");
             SortBySales(S, Prod, Sales);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 6:
+            system("CLS");
             printClusterInfo(C);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 7:
+            system("CLS");
             GraphMonthlySales(S);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 8:
+            system("CLS");
             GraphByProfit(S);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 9:
             cout << "\nEnter Store you want Monthly Sales Trend : ";
@@ -1433,13 +1468,25 @@ void Run()
                 cout << "\nInvalid\nEnter Store you want to Monthly Sales Trend ";
                 cin >> temp_choice;
             }
+            system("CLS");
             GraphByMonthlyTrend(S[temp_choice - 1]);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 10:
+            system("CLS");
             GraphByCluster(C);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         case 11:
+            system("CLS");
             GraphBySubCluster(C);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
             break;
         }
     }
