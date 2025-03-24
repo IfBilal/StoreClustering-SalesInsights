@@ -1,3 +1,6 @@
+/*M.Bilal Tahir
+i243166
+SE-B*/
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -7,7 +10,6 @@
 #include <windows.h>
 #include <cmath>
 #include <conio.h>
-const int Store_size = 100;
 using namespace std;
 struct Store;
 struct Employee;
@@ -85,6 +87,8 @@ struct Forecast
 {
     char *month;
     double predictedSales;
+    bool Warning;
+    double confidence;
 };
 
 struct Store
@@ -113,7 +117,7 @@ struct Salesdata
     double TotalSaleAmount = 0;
 };
 
-void initializeStorename(Store S[Store_size], int i)
+void initializeStorename(Store *S, int i, const int Store_size)
 {
     // Store Name
     S[i].sName = new char[13]; // name can be of max 12 characters
@@ -122,14 +126,14 @@ void initializeStorename(Store S[Store_size], int i)
     strcat(S[i].sName, temp.c_str());
 }
 
-void initializeStoreID(Store S[Store_size], int i)
+void initializeStoreID(Store *S, int i, const int Store_size)
 {
     // Store ID
     // Recheck if store with same Id exists
     S[i].sID = i + 100;
 }
 
-void initializeStoreLocation(Store S[Store_size], int i)
+void initializeStoreLocation(Store *S, int i, const int Store_size)
 {
     // Addition part ensures decimal values are included
     // Location
@@ -137,14 +141,14 @@ void initializeStoreLocation(Store S[Store_size], int i)
     S[i].Location.gLong = (rand() % 360 - 180) + (rand() % 101) / 100.0;
 }
 
-void initializeMonthlyCost(Store S[Store_size], int i)
+void initializeMonthlyCost(Store *S, int i, const int Store_size)
 {
     // Monthly cost of store
     S[i].sMonthlyCost = (rand() % 3500 + 1000) + (rand() % 101) / 100.0;
     S[i].sA.totaloperationalcost = S[i].sMonthlyCost * 24;
 }
 
-void initializeManager(Store S[Store_size], int i)
+void initializeManager(Store *S, int i, const int Store_size)
 {
     // Manager
     S[i].Manager.eID = rand() % 900 + 100;
@@ -174,6 +178,7 @@ void initializeManager(Store S[Store_size], int i)
     }
 }
 
+// deleting store ( without deleting forecast )
 void deleteStore(Store S)
 {
     delete[] S.sName;
@@ -185,7 +190,7 @@ void deleteStore(Store S)
     delete[] S.Staff;
 }
 
-void initializeStaff(Store S[Store_size], int i)
+void initializeStaff(Store *S, int i, const int Store_size)
 {
     // Staff initialize
     S[i].S_count = rand() % 50 + 50;
@@ -234,7 +239,7 @@ void initializeStaff(Store S[Store_size], int i)
     }
 }
 
-void initializeMonthlyCustomerCount(Store S[Store_size], int i)
+void initializeMonthlyCustomerCount(Store *S, int i, const int Store_size)
 {
     // initializing 0 for increasing later
     for (int j = 0; j < 24; j++)
@@ -268,7 +273,7 @@ void initializeProducts(Products Prod[35])
         cout << "error with loading product file";
 }
 
-void initializeSales(Store S[Store_size], Products Prod[35], Salesdata Sales[20000])
+void initializeSales(Store *S, Products Prod[35], Salesdata Sales[20000], const int Store_size)
 {
     srand(time(0));
     for (int i = 0; i < 20000; i++)
@@ -358,7 +363,7 @@ void initializeSales(Store S[Store_size], Products Prod[35], Salesdata Sales[200
     }
 }
 
-void CalculateAnalytics(Store S[Store_size], Products Prod[35], Salesdata *Sales, int i)
+void CalculateAnalytics(Store *S, Products Prod[35], Salesdata *Sales, int i, const int Store_size)
 {
     // calculate  analytics according to sales of a store
     for (int j = 0; j < 20000; j++)
@@ -371,7 +376,7 @@ void CalculateAnalytics(Store S[Store_size], Products Prod[35], Salesdata *Sales
     S[i].sA.profit = S[i].sA.totalSales - S[i].sA.totaloperationalcost;
 }
 
-void initializeData(Store S[Store_size], Products Prod[35])
+void initializeData(Store *S, Products Prod[35], const int Store_size)
 {
     // initializing data
     initializeProducts(Prod);
@@ -379,18 +384,18 @@ void initializeData(Store S[Store_size], Products Prod[35])
     srand(time(0));
     for (int i = 0; i < Store_size; i++)
     {
-        initializeStorename(S, i);
-        initializeStoreID(S, i);
-        initializeStoreLocation(S, i);
-        initializeMonthlyCost(S, i);
-        initializeManager(S, i);
-        initializeStaff(S, i);
-        initializeMonthlyCustomerCount(S, i);
+        initializeStorename(S, i, Store_size);
+        initializeStoreID(S, i, Store_size);
+        initializeStoreLocation(S, i, Store_size);
+        initializeMonthlyCost(S, i, Store_size);
+        initializeManager(S, i, Store_size);
+        initializeStaff(S, i, Store_size);
+        initializeMonthlyCustomerCount(S, i, Store_size);
     }
 }
 
 // deleting all data
-void deleteData(Store S[Store_size], Products Prod[35], Salesdata *Sales)
+void deleteData(Store *S, Products Prod[35], Salesdata *Sales, const int Store_size)
 {
     for (int i = 0; i < Store_size; i++)
     {
@@ -422,7 +427,7 @@ void deleteData(Store S[Store_size], Products Prod[35], Salesdata *Sales)
 }
 
 // Saving stores data in file
-void SaveData(Store S[Store_size])
+void SaveData(Store *S, const int Store_size)
 {
     ofstream File("StoreData.txt");
     if (File.is_open())
@@ -486,7 +491,7 @@ void SaveSales(Salesdata *Sales)
 }
 
 // fetching store data
-bool LoadData(Store S[Store_size])
+bool LoadData(Store *S, const int Store_size)
 {
     ifstream File("StoreData.txt");
     if (File.is_open())
@@ -610,6 +615,7 @@ void LoadSales(Salesdata *Sales)
     }
 }
 
+// function which works like deep copy constructor
 void Store_Deep(Store &TO, const Store &BY)
 {
     TO.sID = BY.sID;
@@ -642,7 +648,8 @@ void Store_Deep(Store &TO, const Store &BY)
     }
 }
 
-void SortOverall(Store S[Store_size], Products P[35], Salesdata *Sales)
+// finding top 10 and bottom 5 stores on basis of overall performance( 50 % profit, 30% growth and 20& total sales)
+void SortOverall(Store *S, Products P[35], Salesdata *Sales, const int Store_size)
 {
     Report R1;
     R1.topStores = new Store[10];
@@ -726,7 +733,8 @@ void SortOverall(Store S[Store_size], Products P[35], Salesdata *Sales)
     delete[] R1.topStores;
 }
 
-void SortByProfit(Store S[Store_size], Products P[35], Salesdata *Sales)
+// finding top 10 and bottom 5 stores on basis of Profit
+void SortByProfit(Store *S, Products P[35], Salesdata *Sales, const int Store_size)
 {
 
     Report R1;
@@ -799,7 +807,8 @@ void SortByProfit(Store S[Store_size], Products P[35], Salesdata *Sales)
     delete[] R1.topStores;
 }
 
-void SortBySales(Store S[Store_size], Products P[35], Salesdata *Sales)
+// finding top 10 and bottom 5 stores on basis of Total no of Sales
+void SortBySales(Store *S, Products P[35], Salesdata *Sales, const int Store_size)
 {
     Report R1;
     R1.topStores = new Store[10];
@@ -876,7 +885,8 @@ void SortBySales(Store S[Store_size], Products P[35], Salesdata *Sales)
     delete[] R1.topStores;
 }
 
-void SortByGrowth(Store S[Store_size], Products P[35], Salesdata *Sales)
+// finding top 10 and bottom 5 stores on basis of growth rate
+void SortByGrowth(Store *S, Products P[35], Salesdata *Sales, const int Store_size)
 {
     Report R1;
     R1.topStores = new Store[10];
@@ -957,72 +967,18 @@ void SortByGrowth(Store S[Store_size], Products P[35], Salesdata *Sales)
     delete[] R1.topStores;
 }
 
-void Predict_Sales(Store &S)
+void Print_Predict_Sales(Store &S)
 {
-
-    // am taking two windows of 6 and 12 months and make predictions from both after that i will find between both the predictions and then
-    // find the confidence level using that gap between the both predictions
-
-    // My actual prediction is the one with 6 month window
-
-    // In finding prediction we also take account of the avg growth rate of last 6 months
-    strcpy(S.sF.month, "March 2025");
-    double avgG[2] = {0};
-    double deviation = 0;
-    double growth = 0;
-    double C_Gap = 0;
-
-    // We are taking a window of 6 months
-    for (int i = 23; i > 17; i--)
-    {
-        avgG[0] = avgG[0] + S.MonthlyIncome[i];
-    }
-    avgG[0] /= 6;
-
-    for (int i = 17; i < 23; i++)
-    {
-        growth += (S.MonthlyIncome[i + 1] - S.MonthlyIncome[i]) / S.MonthlyIncome[i];
-    }
-    growth /= 5;
-
-    // finding  standard deviation in last 6 month sales
-    for (int i = 0; i < 6; i++)
-        deviation += pow(S.MonthlyIncome[23 - i] - avgG[0], 2);
-    deviation = sqrt(deviation / 6.0);
-
-    for (int i = 0; i < 12; i++)
-    {
-        avgG[1] = avgG[1] + S.MonthlyIncome[23 - i];
-    }
-    avgG[1] /= 12;
-    S.sF.predictedSales = avgG[0] * (1 + growth);
-    if (avgG[1] != 0)
-        // finding gap between 6 and 12 month prediction
-        C_Gap = ((abs(avgG[0] - avgG[1]) / avgG[1]) * 100) + (deviation / avgG[0]) * 20;
-    double C_level = 100 - (C_Gap * 1.5);
-    if (C_level < 5) // minimum threshold
-        C_level = 5;
     cout << "=========================ForeCast Report===========================" << endl
          << endl;
     cout << "The predicted Sales for " << S.sF.month << " are : " << S.sF.predictedSales << '$' << endl;
-    cout << "\nThe Confidence level is : " << setprecision(2) << fixed << C_level << '%' << endl;
+    cout << "\nThe Confidence level is : " << setprecision(2) << fixed << S.sF.confidence << '%' << endl;
 
     // prediction if sale is decreased from last month
-    if (S.sF.predictedSales < S.MonthlyIncome[23])
-        cout << "On Warning!!" << endl
-             << endl
-             << endl;
+    (S.sF.Warning) ? cout << "No warning " : cout << "On warning ";
 }
 
-void initializeForecast(Store S[Store_size])
-{
-    for (int i = 0; i < Store_size; i++)
-    {
-        S[i].sF.month = new char[15];
-    }
-}
-
-void initializeSubCluster(Cluster &C, int size)
+void initializeSubCluster(Cluster &C, int size, const int Store_size)
 {
     // initializing subCluster struct
     for (int i = 0; i < size; i++)
@@ -1038,7 +994,7 @@ void initializeSubCluster(Cluster &C, int size)
     }
 }
 
-void initializeCluster(Cluster *C, Store S[Store_size], int size)
+void initializeCluster(Cluster *C, Store *S, int size, const int Store_size)
 {
     // initializing cluster struct
     for (int i = 0; i < size; i++)
@@ -1053,78 +1009,166 @@ void initializeCluster(Cluster *C, Store S[Store_size], int size)
         C[i].sID = new Store[Store_size];
         C[i].subSize = 3;
         C[i].subClusterList = new subCluster[C[i].subSize];
-        initializeSubCluster(C[i], C[i].subSize);
+        initializeSubCluster(C[i], C[i].subSize, Store_size);
 
         C[i].Center.cLat = S[i].Location.gLat;
         C[i].Center.cLong = S[i].Location.gLong;
     }
 }
 
-void UpdateCentroidSub(Cluster &C, int num, int i)
+bool UpdateCentroidSub(Cluster &C, int subSize)
 {
     // initializing centroid of sub cluster
-    C.subClusterList[num].subCenter.Profit = (C.subClusterList[num].subCenter.Profit + C.sID[i].sA.profit) / 2;
+    bool converged = true;
+    double threshold = 100;
+    double tempProf[subSize] = {0};
+    for (int i = 0; i < subSize; i++)
+    {
+
+        for (int j = 0; j < C.subClusterList[i].size; j++)
+        {
+            tempProf[i] += C.subClusterList[i].storesList[j].sA.profit;
+        }
+        if (C.subClusterList[i].size != 0)
+            tempProf[i] /= C.subClusterList[i].size;
+    }
+    for (int i = 0; i < subSize; i++)
+    {
+        double change = sqrt(pow(C.subClusterList[i].subCenter.Profit - tempProf[i], 2));
+        C.subClusterList[i].subCenter.Profit = tempProf[i];
+        if (change > threshold)
+            converged = false;
+    }
+    return converged;
 }
 
-void SubClustering(Cluster &C, Store S[Store_size], int subSize, int size)
+// subclustering on the basis of profit
+void SubClustering(Cluster &C, Store *S, int subSize, int size, const int Store_size)
 {
-    double d[subSize];
-    for (int i = 0; i < C.size; i++)
+    while (true)
     {
-        for (int j = 0; j < C.subSize; j++)
+        double d[subSize];
+        bool converge = 0;
+        for (int i = 0; i < C.size; i++)
         {
-            d[j] = sqrt(pow(C.sID[i].sA.profit - C.subClusterList[j].subCenter.Profit, 2)); // euclidean distance
-        }
-        int index = 0;
-        double small = INT_MAX;
-        for (int j = 0; j < size; j++)
-        {
-            if (small > d[j]) // finding smallest answer of euclidean distance from centroids of all sub clusters to store
+            for (int j = 0; j < subSize; j++)
             {
-                small = d[j];
-                index = j;
+                d[j] = sqrt(pow(C.sID[i].sA.profit - C.subClusterList[j].subCenter.Profit, 2)); // euclidean distance
+            }
+            int index = 0;
+            double small = INT_MAX;
+            for (int j = 0; j < subSize; j++)
+            {
+                if (small > d[j]) // finding smallest answer of euclidean distance from centroids of all sub clusters to store
+                {
+                    small = d[j];
+                    index = j;
+                }
+            }
+            Store_Deep(C.subClusterList[index].storesList[C.subClusterList[index].size], C.sID[i]); // adding store to subcluster
+            C.subClusterList[index].size++;
+        }
+        converge = UpdateCentroidSub(C, subSize);
+        if (converge == true)
+        {
+            break;
+        }
+        else
+        {
+            for (int i = 0; i < subSize; i++)
+            {
+                for (int j = 0; j < C.subClusterList[i].size; j++)
+                {
+                    deleteStore(C.subClusterList[i].storesList[j]);
+                }
+                C.subClusterList[i].size = 0;
             }
         }
-        Store_Deep(C.subClusterList[index].storesList[C.subClusterList[index].size], C.sID[i]); // adding store to subcluster
-        C.subClusterList[index].size++;
-        UpdateCentroidSub(C, index, i); // updating centroid
     }
 }
 
-void UpdateCentroid(Cluster &C)
+bool UpdateCentroid(Cluster &C)
 {
     // update centroid of cluster
-    C.Center.cLat = (C.Center.cLat + C.sID[C.size - 1].Location.gLat) / 2.0;
-    C.Center.cLong = (C.Center.cLong + C.sID[C.size - 1].Location.gLong) / 2.0;
+    if (C.size == 0)
+        return true;
+    double tempLat = 0;
+    double threshold = 0.1;
+    double tempLong = 0;
+    for (int i = 0; i < C.size; i++)
+    {
+        tempLat = tempLat + C.sID[i].Location.gLat;
+        tempLong = tempLong + C.sID[i].Location.gLong;
+    }
+    tempLat /= C.size;
+    tempLong /= C.size;
+    double change = sqrt(pow(C.Center.cLat - tempLat, 2) + pow(C.Center.cLong - tempLong, 2));
+    C.Center.cLat = tempLat;
+    C.Center.cLong = tempLong;
+
+    if (change <= threshold)
+        return true;
+    else
+        return false;
 }
 
-void Clustering(Store S[Store_size], Cluster C[3], int size)
+// clustering on the basis of location
+void Clustering(Store *S, Cluster C[3], int size, const int Store_size)
 {
-    double d[size];
-    for (int i = 0; i < Store_size; i++)
+    while (true)
     {
-        for (int j = 0; j < size; j++)
+        double d[size];
+        bool converge[size] = {0};
+        for (int i = 0; i < Store_size; i++)
         {
-            d[j] = sqrt(pow(S[i].Location.gLat - C[j].Center.cLat, 2) + pow(S[i].Location.gLong - C[j].Center.cLong, 2)); // euclidean distance
-        }
-        int index = 0;
-        double small = INT_MAX;
-        for (int j = 0; j < size; j++)
-        {
-            if (small > d[j]) // finding smallest distance
+            for (int j = 0; j < size; j++)
             {
-                small = d[j];
-                index = j;
+                d[j] = sqrt(pow(S[i].Location.gLat - C[j].Center.cLat, 2) + pow(S[i].Location.gLong - C[j].Center.cLong, 2)); // euclidean distance
+            }
+            int index = 0;
+            double small = INT_MAX;
+            for (int j = 0; j < size; j++)
+            {
+                if (small > d[j]) // finding smallest distance
+                {
+                    small = d[j];
+                    index = j;
+                }
+            }
+            Store_Deep(C[index].sID[C[index].size], S[i]); // adding store with nearest cluster
+            C[index].size++;
+        }
+        for (int j = 0; j < size; j++)
+        {
+            converge[j] = UpdateCentroid(C[j]);
+        }
+        bool check = true;
+        for (int j = 0; j < size; j++)
+        {
+            if (converge[j] != 1)
+                check = 0;
+        }
+        if (check == 1)
+        {
+            break;
+        }
+        else
+        {
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < C[i].size; j++)
+                {
+                    deleteStore(C[i].sID[j]);
+                }
+                C[i].size = 0;
             }
         }
-        Store_Deep(C[index].sID[C[index].size], S[i]); // adding store with nearest cluster
-        C[index].size++;
-        UpdateCentroid(C[index]); // updating centroid
     }
+
     for (int i = 0; i < size; i++)
     {
         // making subcluster for each cluster
-        SubClustering(C[i], S, C[i].subSize, size);
+        SubClustering(C[i], S, C[i].subSize, size, Store_size);
     }
 }
 // deleting cluster and subcluster
@@ -1166,6 +1210,7 @@ void deleteClusters(Cluster C[3], int num)
     }
 }
 
+// print name and id of stores in each subcluster
 void printClusterInfo(Cluster *C)
 {
     for (int i = 0; i < 3; i++)
@@ -1191,7 +1236,8 @@ void printClusterInfo(Cluster *C)
     }
 }
 
-void GraphMonthlySales(Store S[Store_size])
+// graph on the basis of avg of monthly income (last 24 months) of each store
+void GraphMonthlySales(Store *S, const int Store_size)
 {
     cout << "One * is equal to 150 $\n"
          << endl;
@@ -1212,7 +1258,8 @@ void GraphMonthlySales(Store S[Store_size])
     }
 }
 
-void GraphByProfit(Store S[Store_size])
+// graphs on the basis of profit of stores
+void GraphByProfit(Store *S, const int Store_size)
 {
     cout << "One * is equal to 1000$" << endl
          << endl;
@@ -1235,6 +1282,7 @@ void GraphByProfit(Store S[Store_size])
     }
 }
 
+// graphing on the basis of profit of each cluster
 void GraphByCluster(Cluster C[3])
 {
     cout << "One * is equal to 100,000$" << endl;
@@ -1263,6 +1311,7 @@ void GraphByCluster(Cluster C[3])
     cout << C[highest].Name << "  with ID  " << C[highest].cID << " is contributing most to the revenue !" << endl;
 }
 
+// graphs on the bases of manthly income of each month
 void GraphByMonthlyTrend(Store S)
 {
     string months[12] = {"March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February"};
@@ -1281,6 +1330,7 @@ void GraphByMonthlyTrend(Store S)
     }
 }
 
+// Graphing on the bases of subcluster profit
 void GraphBySubCluster(Cluster C[3])
 {
     cout << "\nOne * is equal to 40,000$" << endl;
@@ -1321,28 +1371,151 @@ void GraphBySubCluster(Cluster C[3])
     }
 }
 
+// Print store analytics
+void PrintAnalytics(const Store &S)
+{
+    cout << "The Total Sales are : " << S.sA.totalSales << '$' << endl;
+    cout << "The Total Profit is : " << S.sA.profit << '$' << endl;
+    cout << "The Total Operational Cost : " << S.sA.totaloperationalcost << '$' << endl;
+}
+
+// printing store info
+void PrintStoreInfo(const Store &S)
+{
+    cout << "Store Name: " << S.sName << "\n";
+    cout << "Store ID: " << S.sID << "\n";
+    cout << "Location: (" << S.Location.gLat << ", " << S.Location.gLong << ")\n";
+    cout << "Monthly Cost: " << S.sMonthlyCost << "\n";
+    cout << "Manager: " << S.Manager.eID << "    " << S.Manager.eName << "\n";
+    cout << "Number of Staff: " << S.S_count << "\n";
+
+    for (int i = 0; i < S.S_count; i++)
+    {
+        cout << "  Staff " << i + 1 << ": " << S.Staff[i].eID << "       " << S.Staff[i].eName << endl;
+    }
+    cout << "Customer Count Monthly: ";
+    for (int i = 0; i < 24; i++)
+    {
+        cout << S.CustomerCountMonthly[i] << "  ";
+    }
+    cout << endl;
+
+    cout << "Monthly Income: ";
+    for (int i = 0; i < 24; i++)
+    {
+        cout << S.MonthlyIncome[i] << "$   ";
+    }
+    cout << endl;
+}
+
+// Print graph of last 12 months and next month on basis of sales
+void PrintForecastTrend(const Store &S)
+{
+    string months[12] = {"March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February"};
+    int criteria;
+    cout << "One * represents 100$" << endl;
+    for (int i = 0; i < 12; i++)
+    {
+
+        criteria = S.MonthlyIncome[i + 12] / 100;
+        cout << setw(10) << left << months[i] << " : ";
+        for (int j = 0; j < criteria; j++)
+        {
+            cout << "*";
+        }
+        cout << endl;
+    }
+    criteria = S.sF.predictedSales / 100;
+    cout << "Predicted Sales for March : ";
+    for (int i = 0; i < criteria; i++)
+        cout << "*";
+    cout << endl;
+}
+
+void PredictSales(Store &S)
+{
+    // am taking two windows of 6 and 12 months and make predictions from both after that i will find between both the predictions and then
+    // find the confidence level using that gap between the both predictions
+
+    // My actual prediction is the one with 6 month window
+
+    // In finding prediction we also take account of the avg growth rate of last 6 months
+    S.sF.month = new char[15];
+    strcpy(S.sF.month, "March 2025");
+    double avgG[2] = {0};
+    double deviation = 0;
+    double growth = 0;
+    double C_Gap = 0;
+
+    // We are taking a window of 6 months
+    for (int i = 23; i > 17; i--)
+    {
+        avgG[0] = avgG[0] + S.MonthlyIncome[i];
+    }
+    avgG[0] /= 6;
+
+    for (int i = 17; i < 23; i++)
+    {
+        growth += (S.MonthlyIncome[i + 1] - S.MonthlyIncome[i]) / S.MonthlyIncome[i];
+    }
+    growth /= 5;
+
+    // // finding  standard deviation in last 6 month sales
+    for (int i = 0; i < 6; i++)
+        deviation += pow(S.MonthlyIncome[23 - i] - avgG[0], 2);
+    deviation = sqrt(deviation / 6.0);
+
+    for (int i = 0; i < 12; i++)
+    {
+        avgG[1] = avgG[1] + S.MonthlyIncome[23 - i];
+    }
+    avgG[1] /= 12;
+    S.sF.predictedSales = avgG[0] * (1 + growth);
+    if (avgG[1] != 0)
+        // finding gap between 6 and 12 month prediction
+        C_Gap = ((abs(avgG[0] - avgG[1]) / avgG[1]) * 100) + (deviation / avgG[0]) * 20;
+    double C_level = 100 - (C_Gap * 1.5);
+    if (C_level < 5) // minimum threshold
+        C_level = 5;
+
+    S.sF.confidence = C_level;
+    if (S.sF.predictedSales < S.MonthlyIncome[23])
+        S.sF.Warning = 0;
+    else
+        S.sF.Warning = 1;
+}
 void Run()
 {
     // stores must be greater than 15
     // as we are finding top 10 and bottom 5 stores later in the program
+    int tempAsk;
+    cout << "Press 1 to generate new data or 0 to continue : ";
+    cin >> tempAsk;
+    while (tempAsk != 0 && tempAsk != 1)
+    {
+        cout << "Invalid\nEnter again : ";
+        cin >> tempAsk;
+    }
+    system("CLS");
+    const int Store_size = 100;
     Store S[Store_size];
     Products Prod[35];
     Cluster C[3];
     Salesdata *Sales = new Salesdata[20000];
     ifstream Check("StoreData.txt");
     ifstream Check2("SalesData.txt");
-    if (Check && Check2)
+    if (Check && Check2 && (tempAsk == 0))
     {
         Check.close();
         Check2.close();
-        double check = LoadData(S);
+        double check = LoadData(S, Store_size);
         if (check == 0)
         {
-            initializeData(S, Prod);
-            initializeSales(S, Prod, Sales);
+            initializeData(S, Prod, Store_size);
+            initializeSales(S, Prod, Sales, Store_size);
             for (int i = 0; i < Store_size; i++)
-                CalculateAnalytics(S, Prod, Sales, i);
-            SaveData(S);
+                CalculateAnalytics(S, Prod, Sales, i, Store_size);
+            SaveData(S, Store_size);
             SaveSales(Sales);
         }
         if (check == 1)
@@ -1355,39 +1528,42 @@ void Run()
     {
         Check.close();
         Check2.close();
-        initializeData(S, Prod);
-        initializeSales(S, Prod, Sales);
+        initializeData(S, Prod, Store_size);
+        initializeSales(S, Prod, Sales, Store_size);
         for (int i = 0; i < Store_size; i++)
-            CalculateAnalytics(S, Prod, Sales, i);
-        SaveData(S);
+            CalculateAnalytics(S, Prod, Sales, i, Store_size);
+        SaveData(S, Store_size);
         SaveSales(Sales);
     }
-    initializeForecast(S);
-    initializeCluster(C, S, 3);
-    Clustering(S, C, 3);
+    for (int i = 0; i < Store_size; i++)
+    {
+        PredictSales(S[i]);
+    }
+    initializeCluster(C, S, 3, Store_size);
+    Clustering(S, C, 3, Store_size);
     int choice = 0;
     while (true)
     {
         cout << "\nClick-1 to exit\n1.Sort By Overall Performance \n2.Sort By Profit\n3.Sort By Growth Rate\n";
-        cout << "4.Predict Sales For Next Month\n5.Sort by no of Sales\n6.Print Clusters Info\n7.Graph by Average Monthly Sales\n8.Graph by Profits\n9.Graph by Monthly Sales Trend\n10.Graph By Profit of each cluster\n11.Graph by Profit of all SubClusters\nEnter your choice : ";
+        cout << "4.Predict Sales For Next Month\n5.Sort by no of Sales\n6.Print Clusters Info\n7.Graph by Average Monthly Sales\n8.Graph by Profits\n9.Graph by Monthly Sales Trend\n10.Graph By Profit of each cluster\n11.Graph by Profit of all SubClusters\n12.Print Analytics\n13.Print Overall Store Info \n14.Print Forecast Trend\nEnter your choice : ";
         cin >> choice;
         cout << endl
              << endl;
         if (choice == -1)
         {
-            deleteData(S, Prod, Sales);
+            deleteData(S, Prod, Sales, Store_size);
             deleteClusters(C, 3);
             system("CLS");
             cout << "Thanks for using the system!";
             exit(0);
         }
-        while (choice < 1 || choice > 11)
+        while (choice < 1 || choice > 14)
         {
             cout << "\nInvalid\nEnter your choice again : ";
             cin >> choice;
             if (choice == -1)
             {
-                deleteData(S, Prod, Sales);
+                deleteData(S, Prod, Sales, Store_size);
                 deleteClusters(C, 3);
                 system("CLS");
                 cout << "Thanks for using the system!";
@@ -1398,21 +1574,21 @@ void Run()
         {
         case 1:
             system("CLS");
-            SortOverall(S, Prod, Sales);
+            SortOverall(S, Prod, Sales, Store_size);
             cout << "Press any key to continue";
             getch();
             system("CLS");
             break;
         case 2:
             system("CLS");
-            SortByProfit(S, Prod, Sales);
+            SortByProfit(S, Prod, Sales, Store_size);
             cout << "Press any key to continue";
             getch();
             system("CLS");
             break;
         case 3:
             system("CLS");
-            SortByGrowth(S, Prod, Sales);
+            SortByGrowth(S, Prod, Sales, Store_size);
             cout << "Press any key to continue";
             getch();
             system("CLS");
@@ -1427,14 +1603,14 @@ void Run()
                 cin >> temp_choice;
             }
             system("CLS");
-            Predict_Sales(S[temp_choice - 1]);
+            Print_Predict_Sales(S[temp_choice - 1]);
             cout << "Press any key to continue";
             getch();
             system("CLS");
             break;
         case 5:
             system("CLS");
-            SortBySales(S, Prod, Sales);
+            SortBySales(S, Prod, Sales, Store_size);
             cout << "Press any key to continue";
             getch();
             system("CLS");
@@ -1448,14 +1624,14 @@ void Run()
             break;
         case 7:
             system("CLS");
-            GraphMonthlySales(S);
+            GraphMonthlySales(S, Store_size);
             cout << "Press any key to continue";
             getch();
             system("CLS");
             break;
         case 8:
             system("CLS");
-            GraphByProfit(S);
+            GraphByProfit(S, Store_size);
             cout << "Press any key to continue";
             getch();
             system("CLS");
@@ -1485,6 +1661,48 @@ void Run()
             system("CLS");
             GraphBySubCluster(C);
             cout << "Press any key to continue";
+            getch();
+            system("CLS");
+            break;
+        case 12:
+            cout << "\nEnter Store you want Sales Analytics for : ";
+            cin >> temp_choice;
+            while (temp_choice < 1 || temp_choice > Store_size)
+            {
+                cout << "\nInvalid\nEnter Store you want Sales Analytics for : ";
+                cin >> temp_choice;
+            }
+            system("CLS");
+            PrintAnalytics(S[temp_choice - 1]);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
+            break;
+        case 13:
+            cout << "\nEnter Store you want info for : ";
+            cin >> temp_choice;
+            while (temp_choice < 1 || temp_choice > Store_size)
+            {
+                cout << "\nInvalid\nEnter Store you want info for : ";
+                cin >> temp_choice;
+            }
+            system("CLS");
+            PrintStoreInfo(S[temp_choice - 1]);
+            cout << "Press any key to continue";
+            getch();
+            system("CLS");
+            break;
+        case 14:
+            cout << "\nEnter Store you want Forecast Trend for: ";
+            cin >> temp_choice;
+            while (temp_choice < 1 || temp_choice > Store_size)
+            {
+                cout << "\nInvalid\nEnter again : ";
+                cin >> temp_choice;
+            }
+            system("CLS");
+            PrintForecastTrend(S[temp_choice - 1]);
+            cout << "\nPress any key to continue";
             getch();
             system("CLS");
             break;
