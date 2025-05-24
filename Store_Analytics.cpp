@@ -1,4 +1,3 @@
-/*M.Bilal Tahir*/
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
