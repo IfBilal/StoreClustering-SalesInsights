@@ -1,6 +1,4 @@
-/*M.Bilal Tahir
-i243166
-SE-B*/
+/*M.Bilal Tahir*/
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
